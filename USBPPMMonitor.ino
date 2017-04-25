@@ -1,4 +1,5 @@
 
+#include "Persistency.h"
 #include "PPMGenerator.h"
 #include "TFTProcessor.h"
 //#include <SPI.h>
@@ -24,9 +25,16 @@
 ////Adafruit_ILI9340 tft = Adafruit_ILI9340(TFT_CS, TFT_DC, TFT_MOSI, TFT_CLK, TFT_RST, TFT_MISO);
 //TFT_ILI93XX tft = TFT_ILI93XX(A3, TFT_DC);// , TFT_DC);// , TFT_RST);
 
+struct MODULE_CONFIG {
+	uint16_t ppm_fail_safe_time;
+	uint16_t ppm_channel_failsafe[8];
+};
+
+Persistency<MODULE_CONFIG> persistency;
+
 
 const char Banner[] = "** CMD **";
-const char Prompt[] = ">>";
+const char Prompt[] = ">";
 const char BadCommand[] = "Command not recognized";
 
 Cmd cmdSerial(&Serial, 50, false, (char*)&Banner, (char*)&Prompt, (char*)&BadCommand);

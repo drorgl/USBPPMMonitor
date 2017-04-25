@@ -63,3 +63,8 @@ void PPMGenerator::set_value(byte channel, int value) {
 	rc::setOutputChannel(static_cast<rc::OutputChannel>(channel), value);
 	g_PPMOut.update();
 }
+
+
+void PPMGenerator::poll() {
+
+}

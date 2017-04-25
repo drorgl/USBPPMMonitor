@@ -25,7 +25,7 @@ public:
 	void set_value(byte channel, int value);
 
 	//TODO: add failsafe, reduce throttle to 700 if no change was received in the last 100ms
-	//void poll();
+	void poll();
 };
 
 
