@@ -7,6 +7,29 @@ Ofcurse if the module lost power, the APM should enter failsafe as well.
 
 **THIS PROJECT IS EXPERIMENTAL AND UNTESTED AND INTENDED ONLY FOR EDUCATIONAL PURPOSES** 
 
+The following list of commands are accepted:
+```
+setOrientation 0/1/2/3
+drawArc cx cy radius thickness start end color
+fillScreen color
+drawCircle x y radius color
+drawFastHLine x y w color
+drawFastVLine x y h color
+setCursor x y
+setTextColor frgrnd bckgnd
+setTextScale sx sy
+println string
+drawRect x y w h color
+drawRoundRect x y w hradius color
+fillRect x y w h color1 [color2]
+fillRoundRect x y w h radius color
+```
+And for PPM generator:
+```
+setChFailSafe channel value
+setFailSafeTime ms
+setCh channel value
+```
 This project uses the following dependencies:
 - ArduinoRCLib by Daniel van den Ouden http://sourceforge.net/p/arduinorclib/
 - TFT_ILI93XX by Max MC Costa, forked here https://github.com/drorgl/TFT_ILI93XX
