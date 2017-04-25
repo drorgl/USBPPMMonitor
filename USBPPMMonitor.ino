@@ -88,4 +88,5 @@ void loop()
 		ppmgenerator.save_config = false;
 		persistency.save(PERSISTENCY_VERSION, 0, &module_config);
 	}
+	Serial.flush();
 }
