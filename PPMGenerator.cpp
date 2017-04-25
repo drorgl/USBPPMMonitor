@@ -1,18 +1,13 @@
-// 
-// 
-// 
-
 #include "PPMGenerator.h"
-
 
 #include "PPM/outputchannel.h"
 #include "PPM/PPMOut.h"
 #include "PPM/Timer1.h"
 
 
-#define CHANNELS 8
-
 rc::PPMOut g_PPMOut(CHANNELS);
+
+unsigned long PPMGenerator::last_command = 0;
 
 
 void setCh(int argc, char **argv) {
@@ -26,27 +21,45 @@ void setCh(int argc, char **argv) {
 
 	rc::setOutputChannel(static_cast<rc::OutputChannel>(ch.toInt()), val.toInt());
 	g_PPMOut.update();
+	PPMGenerator::last_command = millis();
 }
 
-void PPMGenerator::init(Cmd *cmdSerial_, byte pin) {
-	cmdSerial = cmdSerial_;
-	cmdSerial->Add("setCh", setCh);
-	//ppm_encoder_init(pin);
-	//setup_ppm(pin);
 
-	// Initialize timer1, this is required for all features that use Timer1
-	// (PPMIn/PPMOut/ServoIn/ServoOut)
-	rc::Timer1::init();
-
+void PPMGenerator::set_failsafe_state() {
+	if (_config->ppm_fail_safe_time < 100 || _config->ppm_fail_safe_time > 5000) {
+		_config->ppm_fail_safe_time = 500;
+	}
 	for (uint8_t i = 0; i < CHANNELS; ++i)
 	{
-
 		// fill input buffer, convert raw values to microseconds
 		// we'll need to cast our iterator to an OutputChannel, but ugly but safe
-		rc::setOutputChannel(static_cast<rc::OutputChannel>(i), 1500);
+
+		if (_config->ppm_channel_failsafe[i] < 500 || _config->ppm_channel_failsafe[i] > 3000) {
+			_config->ppm_channel_failsafe[i] = 1500;
+		}
+
+		rc::setOutputChannel(static_cast<rc::OutputChannel>(i), _config->ppm_channel_failsafe[i]);
 	}
 
-	rc::setOutputChannel(static_cast<rc::OutputChannel>(3), 700);
+	//set throttle failsafe
+	if (_config->ppm_channel_failsafe[3] < 500 || _config->ppm_channel_failsafe[3] > 3000) {
+		_config->ppm_channel_failsafe[3] = 700;
+	}
+
+	rc::setOutputChannel(static_cast<rc::OutputChannel>(3), _config->ppm_channel_failsafe[3]);
+	g_PPMOut.update();
+}
+
+void PPMGenerator::init(Cmd *cmdSerial_, byte pin, PPM_INFO *config) {
+	PPMGenerator::last_command = 0;
+	_config = config;
+	save_config = false;
+
+	
+	
+	cmdSerial = cmdSerial_;
+	cmdSerial->Add("setCh", setCh);
+	rc::Timer1::init();
 
 	// initialize PPMOut with some settings
 	g_PPMOut.setPulseLength(448);   // pulse length in microseconds
@@ -55,16 +68,18 @@ void PPMGenerator::init(Cmd *cmdSerial_, byte pin) {
 
 									// start PPMOut, use pin 9 (pins 9 and 10 are preferred)
 	g_PPMOut.start(pin);
+
+	set_failsafe_state();
 }
 
 void PPMGenerator::set_value(byte channel, int value) {
-	//ppm_write_channel(channel, value);
-	//ppm[channel] = value;
 	rc::setOutputChannel(static_cast<rc::OutputChannel>(channel), value);
 	g_PPMOut.update();
 }
 
 
 void PPMGenerator::poll() {
-
+	if (PPMGenerator::last_command + _config->ppm_fail_safe_time < millis()) {
+		set_failsafe_state();
+	}
 }

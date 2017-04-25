@@ -1,5 +1,3 @@
-// Persistency.h
-
 #ifndef _PERSISTENCY_h
 #define _PERSISTENCY_h
 
